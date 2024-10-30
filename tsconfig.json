@@ -1,0 +1,43 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es6",
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "paths": {
+      "@/modules/*": ["src/modules/*"]
+    },
+    "resolveJsonModule": true,
+    "removeComments": false ,
+    "noEmitOnError": true ,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true ,
+    "forceConsistentCasingInFileNames": true ,
+
+    "strict": true,
+    "noImplicitAny": true ,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "useUnknownInCatchVariables": true ,
+    "alwaysStrict": true ,
+    "noUnusedLocals": true ,
+    "noUnusedParameters": true ,
+    "exactOptionalPropertyTypes": true ,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true ,
+    "noUncheckedIndexedAccess": true ,
+    "noImplicitOverride": true ,
+    "noPropertyAccessFromIndexSignature": true ,
+    "allowUnusedLabels": true ,
+    "allowUnreachableCode": true,
+    "skipLibCheck": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
+}
