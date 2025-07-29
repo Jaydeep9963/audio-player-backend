@@ -17,7 +17,7 @@ const defaultIRoute: IRoute[] = [
     route: authRoute,
   },
   {
-    path: '/users',
+    path: '/user',
     route: userRoute,
   },
 ];

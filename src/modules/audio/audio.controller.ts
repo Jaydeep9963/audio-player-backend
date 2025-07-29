@@ -1,4 +1,5 @@
 /* eslint-disable prettier/prettier */
+// import mm from "music-metadata";
 import { Request, Response } from 'express';
 import httpStatus from 'http-status';
 import mongoose from 'mongoose';
@@ -60,6 +61,10 @@ export const addAudio = catchAsync(async (req: Request, res: Response) => {
     const lyricsFile = files['lyrics'] ? files['lyrics'][0] : null;
     const imageFile = files['image'] ? files['image'][0] : null;
 
+   
+    // const parser = await mm.parseFile("./uploads/audio/audioFile/1733749853348-Dil Tenu De Dita_128-(PagalWorld).mp3");
+    // console.log("🚀 ~ addAudio ~ parser:", parser)
+
     const newAudio = {
       title,
       audio: audioFile
@@ -102,6 +107,7 @@ export const addAudio = catchAsync(async (req: Request, res: Response) => {
     }
     return res.status(201).json({ success: true, data: createdAudio });
   } catch (error) {
+    console.log('🚀 ~ addAudio ~ error:', error);
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Internal Server Error');
   }
 });
@@ -159,7 +165,7 @@ export const updateAudio = catchAsync(async (req: Request, res: Response) => {
         : findAudio.lyrics, // Keep existing lyrics if no new file is uploaded
     };
 
-    const updatedAudio = await(
+    const updatedAudio = await (
       await Audio.findByIdAndUpdate(audioId, { $set: audio }, { new: true, runValidators: true })
     )?.populate({
       path: 'subcategory',

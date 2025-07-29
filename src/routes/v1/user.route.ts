@@ -1,7 +1,7 @@
 import express, { Router } from 'express';
-import { validate } from '../../modules/validate';
-import { auth } from '../../modules/auth';
-import { userController, userValidation } from '../../modules/admin';
+import { categoryController } from '../../modules/category';
+import { subCategoryController } from '../../modules/subCategory';
+import { audioController } from '../../modules/audio';
 
 const router: Router = express.Router();
 
@@ -10,7 +10,10 @@ const router: Router = express.Router();
 //   .post(auth('manageUsers'), validate(userValidation.createUser), userController.createUser)
 //   .get(auth('getUsers'), validate(userValidation.getUsers), userController.getUsers);
 
-router.route('/:userId').get(auth('getUsers'), validate(userValidation.getUser), userController.getUser);
+// router.route('/:userId').get(auth('getUsers'), validate(userValidation.getUser), userController.getUser);
+router.get('/categories', categoryController.getCategories);
+router.get('/subcategories', subCategoryController.getSubCategories);
+router.get('/audios', audioController.getAudios);
 
 export default router;
 
