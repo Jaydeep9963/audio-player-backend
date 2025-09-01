@@ -1,12 +1,21 @@
 /* eslint-disable prettier/prettier */
 import mongoose, { Document, Schema } from 'mongoose'; 
 
+// Define file structure interface
+interface FileData {
+  file: string;
+  fileName: string;
+  fileType: string;
+  fileSize: number;
+}
+
 interface IAudio extends Document {
   title: string;
-  audio: File; // URL for the .mp3 file
-  lyrics: File; // URL for the .lrc file
-  image: File; // URL for the image
+  audio: FileData; // Object with file properties
+  lyrics: FileData; // Object with file properties
+  image: FileData; // Object with file properties
   subcategory: Schema.Types.ObjectId;
+  artist: Schema.Types.ObjectId; // Added artist field
 }
 
 const AudioSchema: Schema = new Schema({
@@ -65,6 +74,7 @@ const AudioSchema: Schema = new Schema({
     },
   },
   subcategory: { type: Schema.Types.ObjectId, ref: 'Subcategory', required: true },
+  artist: { type: Schema.Types.ObjectId, ref: 'Artist', required: true }, // Added artist reference
 });
 
 export default mongoose.model<IAudio>('Audio', AudioSchema);

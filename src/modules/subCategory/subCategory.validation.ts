@@ -5,8 +5,8 @@ import { objectId } from '../validate';
 export const subcategories = {
   body: Joi.object().keys({
     subCategoryName: Joi.string().required(),
-    categoryId: Joi.string().required(),
-    description: Joi.string(),
+    categoryId: Joi.string().required(), 
+    description: Joi.string().optional(),
   }),
 };
 

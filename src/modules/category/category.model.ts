@@ -1,11 +1,19 @@
 /* eslint-disable prettier/prettier */
 import mongoose, { Document, Schema } from 'mongoose';
 
-interface ICategory extends Document {
+// Define a custom image type
+interface IImage {
+  file: string | null; // store the file URL / path
+  fileName: string;
+  fileType: string;
+  fileSize: number;
+}
+
+export interface ICategory extends Document {
   category_name: string;
-  image: File;
+  image: IImage; // use your custom type instead of browser File
   description: string;
-  subcategories: Array<string>;
+  subcategories: string[];
 }
 
 const CategorySchema: Schema = new Schema({
@@ -13,19 +21,19 @@ const CategorySchema: Schema = new Schema({
   image: {
     file: {
       type: String,
-      required: true, 
+      required: true,
     },
     fileName: {
       type: String,
-      required: true, 
+      required: true,
     },
     fileType: {
       type: String,
-      required: true, 
+      required: true,
     },
     fileSize: {
       type: Number,
-      required: true, 
+      required: true,
     },
   },
   description: {

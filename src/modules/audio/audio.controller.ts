@@ -10,49 +10,51 @@ import { SubCategory } from '../subCategory';
 
 export const getAudios = catchAsync(async (req: Request, res: Response) => {
   try {
-    const audioName = (req.query['audioName']?.toString().trim().toLowerCase() || '') as string;
-    const page = parseInt(req.query['page'] as string, 10) || 1;
-    const limit = parseInt(req.query['limit'] as string, 10) || 10;
-    const skip = (page - 1) * limit;
+    const audioName = (req.query['audioName']?.toString().trim() || '') as string;
 
+    // Changed from prefix match to contains match for Spotify-like search
+    // This will match any part of the title, not just the beginning
     const filter = audioName ? { title: { $regex: audioName, $options: 'i' } } : {};
+
     const audioList = await Audio.find(filter)
       .populate({
         path: 'subcategory',
         select: '_id subcategory_name',
-      })
-      .skip(skip)
-      .limit(limit);
-
-    const totalAudios = await Audio.countDocuments();
-    const totalPages = Math.ceil(totalAudios / limit);
-
-    if (audioList) {
-      res.status(200).json({
-        audios: audioList,
-        totalAudios,
-        totalPages,
-        currentPage: page,
-        pageSize: limit,
       });
-    } else {
-      res.json({ audios: [] });
-    }
+
+    const totalAudios = await Audio.countDocuments(filter);
+
+    res.status(200).json({
+      audios: audioList,
+      totalAudios,
+    });
   } catch (error) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Internal Server Error');
   }
 });
 
+
 export default getAudios;
 
 export const addAudio = catchAsync(async (req: Request, res: Response) => {
   try {
-    const { title, subCategoryId } = req.body;
+    const { title, subCategoryId, artistId } = req.body;
     // Check if a category with the same name already exists
     const findSubcategory = await SubCategory.findById(new mongoose.Types.ObjectId(subCategoryId));
 
     if (!findSubcategory) {
       return res.status(404).json({ message: 'SubCategory does not exist' });
+    }
+
+    // Check if artist exists
+    if (artistId) {
+      const Artist = mongoose.model('Artist');
+      const artist = await Artist.findById(artistId);
+      if (!artist) {
+        return res.status(404).json({ message: 'Artist does not exist' });
+      }
+    } else {
+      return res.status(400).json({ message: 'Artist ID is required' });
     }
 
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
@@ -61,15 +63,11 @@ export const addAudio = catchAsync(async (req: Request, res: Response) => {
     const lyricsFile = files['lyrics'] ? files['lyrics'][0] : null;
     const imageFile = files['image'] ? files['image'][0] : null;
 
-   
-    // const parser = await mm.parseFile("./uploads/audio/audioFile/1733749853348-Dil Tenu De Dita_128-(PagalWorld).mp3");
-    // console.log("🚀 ~ addAudio ~ parser:", parser)
-
     const newAudio = {
       title,
       audio: audioFile
         ? {
-            file: audioFile.path,
+            file: `uploads/audio/audioFile/${audioFile.filename}`, // Removed leading slash
             fileName: audioFile.filename,
             fileType: audioFile.mimetype,
             fileSize: audioFile.size,
@@ -77,16 +75,17 @@ export const addAudio = catchAsync(async (req: Request, res: Response) => {
         : null,
       image: imageFile
         ? {
-            file: imageFile.path,
+            file: `uploads/audio/image/${imageFile.filename}`, // Removed leading slash
             fileName: imageFile.filename,
             fileType: imageFile.mimetype,
             fileSize: imageFile.size,
           }
         : null,
       subcategory: subCategoryId,
+      artist: artistId,
       lyrics: lyricsFile
         ? {
-            file: lyricsFile.path,
+            file: `uploads/audio/lyricsFile/${lyricsFile.filename}`, // Removed leading slash
             fileName: lyricsFile.filename,
             fileType: lyricsFile.mimetype,
             fileSize: lyricsFile.size,
@@ -96,14 +95,29 @@ export const addAudio = catchAsync(async (req: Request, res: Response) => {
 
     const createdAudio = await (
       await Audio.create(newAudio)
-    ).populate({
-      path: 'subcategory',
-      select: '_id subcategory_name',
-    });
+    ).populate([
+      {
+        path: 'subcategory',
+        select: '_id subcategory_name',
+      },
+      {
+        path: 'artist',
+        select: '_id name',
+      }
+    ]);
 
     if (createdAudio) {
+      // Add audio to subcategory's audios array
       findSubcategory.audios.push(createdAudio.id);
-      findSubcategory.save();
+      await findSubcategory.save();
+      
+      // Add audio to artist's audios array
+      const Artist = mongoose.model('Artist');
+      const artist = await Artist.findById(artistId);
+      if (artist) {
+        artist.audios.push(createdAudio.id);
+        await artist.save();
+      }
     }
     return res.status(201).json({ success: true, data: createdAudio });
   } catch (error) {
@@ -140,7 +154,7 @@ export const updateAudio = catchAsync(async (req: Request, res: Response) => {
       title: title || findAudio.title, // Keep existing title if not provided
       audio: audioFile
         ? {
-            file: audioFile.path,
+            file: `uploads/audio/audioFile/${audioFile.filename}`, // Removed leading slash
             fileName: audioFile.filename,
             fileType: audioFile.mimetype,
             fileSize: audioFile.size,
@@ -148,7 +162,7 @@ export const updateAudio = catchAsync(async (req: Request, res: Response) => {
         : findAudio.audio, // Keep existing audio if no new file is uploaded
       image: imageFile
         ? {
-            file: imageFile.path,
+            file: `uploads/audio/image/${imageFile.filename}`, // Removed leading slash
             fileName: imageFile.filename,
             fileType: imageFile.mimetype,
             fileSize: imageFile.size,
@@ -157,7 +171,7 @@ export const updateAudio = catchAsync(async (req: Request, res: Response) => {
       subcategory: newSubCatId || findAudio.subcategory, // Keep existing subcategory if not provided
       lyrics: lyricsFile
         ? {
-            file: lyricsFile.path,
+            file: `uploads/audio/lyricsFile/${lyricsFile.filename}`, // Removed leading slash
             fileName: lyricsFile.filename,
             fileType: lyricsFile.mimetype,
             fileSize: lyricsFile.size,

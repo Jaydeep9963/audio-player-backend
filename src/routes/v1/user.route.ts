@@ -2,6 +2,10 @@ import express, { Router } from 'express';
 import { categoryController } from '../../modules/category';
 import { subCategoryController } from '../../modules/subCategory';
 import { audioController } from '../../modules/audio';
+import { artistController } from '../../modules/artist';
+// Add this import at the top with other imports
+import { aboutUsController } from '../../modules/aboutUs';
+import { feedbackController } from '../../modules/feedback';
 
 const router: Router = express.Router();
 
@@ -14,6 +18,11 @@ const router: Router = express.Router();
 router.get('/categories', categoryController.getCategories);
 router.get('/subcategories', subCategoryController.getSubCategories);
 router.get('/audios', audioController.getAudios);
+router.get('/artists', artistController.getArtists);
+router.get('/search', audioController.getAudios);
+
+// router.get('/artists/:artistId/i', artistController.getArtistById);
+router.get('/artists/:artistId', artistController.getArtistSongs);
 
 export default router;
 
@@ -253,3 +262,11 @@ export default router;
  *       "404":
  *         $ref: '#/components/responses/NotFound'
  */
+
+// About Us route (user)
+router.get('/about-us', aboutUsController.getAboutUs);
+
+// Separate feedback routes (user)
+router.post('/rate', feedbackController.submitRating);
+router.post('/feedback', feedbackController.submitFeedback);
+router.post('/rate-and-feedback', feedbackController.submitRatingAndFeedback);

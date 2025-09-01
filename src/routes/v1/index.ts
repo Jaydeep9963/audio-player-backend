@@ -41,4 +41,10 @@ defaultIRoute.forEach((route) => {
 //   });
 // }
 
+// Add this import
+import { artistRoute } from '../../modules/artist';
+
+// Add this route
+router.use('/artists', artistRoute);
+
 export default router;

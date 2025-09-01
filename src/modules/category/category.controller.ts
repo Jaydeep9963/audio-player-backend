@@ -2,22 +2,36 @@
 import { Request, Response } from 'express';
 import httpStatus from 'http-status';
 import mongoose from 'mongoose';
+import fs from 'fs';
+
 import { catchAsync } from '../utils';
 import { ApiError } from '../errors';
 import Category from './category.model';
 import SubCategory from '../subCategory/subCategory.model';
 import Audio from '../audio/audio.model';
 
+// Utility function to check if image file exists
+const checkImageExists = (imagePath: string): boolean => {
+  try {
+    // Remove the leading /uploads/ to get the relative path for fs.existsSync
+    const relativePath = imagePath.startsWith('/uploads/') ? imagePath.substring(8) : imagePath;
+    return fs.existsSync(relativePath);
+  } catch (error) {
+    return false;
+  }
+};
+
 export const getTotalNumbers = catchAsync(async (_req: Request, res: Response) => {
   try {
     const totalNumOfCategory = await Category.count();
     const totalNumOfSubCategory = await SubCategory.count();
     const totalNumOfAudio = await Audio.count();
-    if (totalNumOfCategory && totalNumOfSubCategory && totalNumOfAudio){
-      res.status(200).json({ totalNumOfCategory, totalNumOfSubCategory, totalNumOfAudio });
-    }else{
-      res.status(404).json({message: "Not found"});
-    }
+
+    res.status(200).json({
+      totalNumOfCategory,
+      totalNumOfSubCategory,
+      totalNumOfAudio,
+    });
   } catch (error) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Internal Server Error');
   }
@@ -31,14 +45,35 @@ export const getCategories = catchAsync(async (req: Request, res: Response) => {
     const skip = (page - 1) * limit;
 
     const filter = categoryName ? { category_name: { $regex: categoryName, $options: 'i' } } : {};
-    
+
     const categoryList = await Category.find(filter).skip(skip).limit(limit);
+
+    // Filter out categories with missing images and provide default image for missing ones
+    const processedCategories = categoryList.map((category) => {
+      const categoryObj = category.toObject();
+
+      // Check if image file exists
+      if (categoryObj.image && categoryObj.image.file) {
+        const imageExists = checkImageExists(categoryObj.image.file);
+        if (!imageExists) {
+          // Set a default image or null for missing images
+          categoryObj.image = {
+            file: null,
+            fileName: 'default-image.jpg',
+            fileType: 'image/jpeg',
+            fileSize: 0,
+          };
+        }
+      }
+
+      return categoryObj;
+    });
 
     const totalCategories = await Category.countDocuments(filter);
     const totalPages = Math.ceil(totalCategories / limit);
 
     res.status(200).json({
-      categories: categoryList,
+      categories: processedCategories,
       totalCategories,
       totalPages,
       currentPage: page,
@@ -65,7 +100,12 @@ export const addCategory = catchAsync(async (req: Request, res: Response) => {
 
     const newCategory = {
       category_name: categoryName,
-      image: { file: req.file?.path, fileName: req.file?.filename, fileType: req.file?.mimetype, fileSize: req.file?.size },
+      image: {
+        file: `/uploads/category/image/${req.file?.filename}`, // Use the correct path for static serving
+        fileName: req.file?.filename,
+        fileType: req.file?.mimetype,
+        fileSize: req.file?.size,
+      },
       description: description ?? '',
     };
 
@@ -86,13 +126,15 @@ export const updateCategory = catchAsync(async (req: Request, res: Response) => 
     // Set up the fields to be updated
     const updateCat = {
       category_name: categoryName || findCategory?.category_name,
-      image: req.file ? {
-        file: req.file?.path,
-        fileName: req.file?.filename,
-        fileType: req.file?.mimetype,
-        fileSize: req.file?.size,
-      } : findCategory?.image,
-      description : description || findCategory?.description,
+      image: req.file
+        ? {
+            file: `/uploads/category/image/${req.file?.filename}`, // Use the correct path for static serving
+            fileName: req.file?.filename,
+            fileType: req.file?.mimetype,
+            fileSize: req.file?.size,
+          }
+        : findCategory?.image,
+      description: description || findCategory?.description,
     };
 
     const updatedCategory = await Category.findByIdAndUpdate(

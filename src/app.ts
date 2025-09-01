@@ -24,14 +24,47 @@ if (config.env !== 'test') {
 app.use(helmet());
 
 // enable cors
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:3001',
+  'http://192.168.1.196:3002',
+  'http://192.168.1.129:3002',
+  config.clientUrl,
+].filter(Boolean);
+
 app.use(
   cors({
-    origin: 'http://localhost:3001',
+    origin: allowedOrigins,
     methods: 'GET,POST,PUT,DELETE',
+    allowedHeaders: ['Content-Type', 'Authorization'],
   })
 );
 app.options('*', cors());
+// Add this before your static middleware
+app.use((req, _res, next) => {
+  // Normalize path to remove double slashes
+  req.url = req.url.replace(/\/+/g, '/');
+  next();
+});
+
 app.use('/uploads', express.static('uploads'));
+
+// Handle missing static files gracefully
+app.use('/uploads', (req, res) => {
+  // If the static middleware didn't serve a file, it means the file doesn't exist
+  if (!res.headersSent) {
+    // Log the missing file for debugging
+    console.log(`Missing file requested: ${req.path}`);
+
+    // Return a proper 404 with more information
+    res.status(404).json({
+      message: 'File not found',
+      path: req.path,
+      timestamp: new Date().toISOString(),
+      suggestion: 'The file may have been deleted or the path may be incorrect',
+    });
+  }
+});
 
 // parse json request body
 app.use(express.json());

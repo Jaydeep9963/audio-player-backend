@@ -9,6 +9,10 @@ import authenticateToken from './authenticationMiddleware';
 import { privacyPolicyController } from '../../modules/privacyPolicy';
 import { termAndConditionController } from '../../modules/term&condition';
 // import { auth } from '../../modules/auth';
+import { artistController } from '../../modules/artist';
+// Add these imports at the top with other imports
+import { aboutUsController } from '../../modules/aboutUs';
+import { feedbackController } from '../../modules/feedback';
 
 const router: Router = express.Router();
 
@@ -103,6 +107,11 @@ router.delete('/privacy-policy', authenticateToken, upload.none(), privacyPolicy
 router.get('/termAndCondition', authenticateToken, upload.none(), termAndConditionController.getTac);
 router.post('/termAndCondition', authenticateToken, upload.none(), termAndConditionController.postTac);
 router.delete('/termAndCondition', authenticateToken, upload.none(), termAndConditionController.deleteTac);
+
+router.get('/artists', authenticateToken, artistController.getArtists);
+router.post('/artists', authenticateToken, upload.single('image'), artistController.addArtist);
+router.get('/artists/:artistId', authenticateToken, artistController.getArtistById);
+router.get('/artists/:artistId/songs', authenticateToken, artistController.getArtistSongs);
 
 export default router;
 
@@ -378,3 +387,22 @@ export default router;
  *               code: 401
  *               message: verify email failed
  */
+
+// artist
+router.get('/artists', authenticateToken, artistController.getArtists);
+router.post(
+  '/artists',
+  authenticateToken,
+  upload.single('image'),
+  artistController.addArtist
+);
+router.get('/artists/:artistId', authenticateToken, artistController.getArtistById);
+router.get('/artists/:artistId/songs', authenticateToken, artistController.getArtistSongs);
+
+// Add these routes before the export default router
+
+// About Us routes (admin)
+router.post('/about-us', authenticateToken, aboutUsController.updateAboutUs);
+
+// Feedback routes (admin)
+router.get('/feedback', authenticateToken, feedbackController.getAllFeedback);
