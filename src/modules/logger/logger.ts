@@ -1,9 +1,9 @@
 import winston from 'winston';
 import config from '../../config/config';
 
-interface LoggingInfo {
+interface LoggingInfo extends winston.Logform.TransformableInfo {
   level: string;
-  message: string;
+  message: any;
 }
 
 const enumerateErrorFormat = winston.format((info: LoggingInfo) => {
