@@ -1,5 +1,5 @@
 # development stage
-FROM node:14-alpine as base
+FROM node:18-alpine as base
 
 WORKDIR /usr/src/app
 
@@ -12,7 +12,7 @@ RUN ls -a
 RUN npm ci && npm run compile
 
 # production stage
-FROM base as production
+FROM node:18-alpine as production
 
 WORKDIR /usr/prod/app
 
