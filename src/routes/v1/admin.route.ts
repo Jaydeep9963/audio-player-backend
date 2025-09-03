@@ -13,19 +13,16 @@ import { artistController } from '../../modules/artist';
 // Add these imports at the top with other imports
 import { aboutUsController } from '../../modules/aboutUs';
 import { feedbackController } from '../../modules/feedback';
+import { notificationTokenController } from '../../modules/notificationToken';
 
 const router: Router = express.Router();
 
-// router.post('/register', validate(authValidation.register), authController.register);
+// Authentication routes
 router.post('/login', upload.none(), validate(authValidation.login), authController.login);
 router.post('/logout', validate(authValidation.logout), authController.logout);
-// router.post('/refresh-tokens', validate(authValidation.refreshTokens), authController.refreshTokens);
 router.post('/forgot-password', validate(authValidation.forgotPassword), authController.forgotPassword);
-// router.post('/reset-password', validate(authValidation.resetPassword), authController.resetPassword);
-// router.post('/send-verification-email', auth(), authController.sendVerificationEmail);
-// router.post('/verify-email', validate(authValidation.verifyEmail), authController.verifyEmail);
 
-// category
+// Category routes
 router.get('/overview', authenticateToken, categoryController.getTotalNumbers);
 router.get('/categories', authenticateToken, categoryController.getCategories);
 router.post(
@@ -49,7 +46,7 @@ router.delete(
   categoryController.deleteCategory
 );
 
-// subCategory
+// SubCategory routes
 router.get('/subcategories', authenticateToken, subCategoryController.getSubCategories);
 router.post(
   '/subcategories',
@@ -72,7 +69,7 @@ router.delete(
   subCategoryController.deleteSubCategory
 );
 
-// audio
+// Audio routes
 router.get('/audios', authenticateToken, audioController.getAudios);
 router.post(
   '/audios',
@@ -84,7 +81,6 @@ router.post(
   ]),
   audioController.addAudio
 );
-
 router.put(
   '/audios/:audioId',
   authenticateToken,
@@ -95,25 +91,34 @@ router.put(
   ]),
   audioController.updateAudio
 );
-
 router.delete('/audios/:audioId', authenticateToken, audioController.deleteAudio);
 
-// privacy-policy
-router.get('/privacy-policy', authenticateToken, upload.none(), privacyPolicyController.getPrivacyPolicy);
-router.post('/privacy-policy', authenticateToken, upload.none(), privacyPolicyController.postPrivacyPolicy);
-router.delete('/privacy-policy', authenticateToken, upload.none(), privacyPolicyController.deletePrivacyPolicy);
-
-// termAndCondition
-router.get('/termAndCondition', authenticateToken, upload.none(), termAndConditionController.getTac);
-router.post('/termAndCondition', authenticateToken, upload.none(), termAndConditionController.postTac);
-router.delete('/termAndCondition', authenticateToken, upload.none(), termAndConditionController.deleteTac);
-
+// Artist routes
 router.get('/artists', authenticateToken, artistController.getArtists);
 router.post('/artists', authenticateToken, upload.single('image'), artistController.addArtist);
 router.get('/artists/:artistId', authenticateToken, artistController.getArtistById);
 router.get('/artists/:artistId/songs', authenticateToken, artistController.getArtistSongs);
 
-export default router;
+// Privacy Policy routes
+router.get('/privacy-policy', authenticateToken, upload.none(), privacyPolicyController.getPrivacyPolicy);
+router.post('/privacy-policy', authenticateToken, upload.none(), privacyPolicyController.postPrivacyPolicy);
+router.delete('/privacy-policy', authenticateToken, upload.none(), privacyPolicyController.deletePrivacyPolicy);
+
+// Terms and Conditions routes
+router.get('/termAndCondition', authenticateToken, upload.none(), termAndConditionController.getTac);
+router.post('/termAndCondition', authenticateToken, upload.none(), termAndConditionController.postTac);
+router.delete('/termAndCondition', authenticateToken, upload.none(), termAndConditionController.deleteTac);
+
+// About Us routes (admin)
+router.get('/about-us', authenticateToken, upload.none(), aboutUsController.getAboutUs);
+router.post('/about-us', authenticateToken, upload.none(), aboutUsController.postAboutUs);
+router.delete('/about-us', authenticateToken, upload.none(), aboutUsController.deleteAboutUs);
+
+// Feedback routes (admin)
+router.get('/feedback', authenticateToken, feedbackController.getAllFeedback);
+
+// Notification Token routes (admin)
+router.get('/notification-tokens', authenticateToken, notificationTokenController.getAllNotificationTokens);
 
 /**
  * @swagger
@@ -388,21 +393,4 @@ export default router;
  *               message: verify email failed
  */
 
-// artist
-router.get('/artists', authenticateToken, artistController.getArtists);
-router.post(
-  '/artists',
-  authenticateToken,
-  upload.single('image'),
-  artistController.addArtist
-);
-router.get('/artists/:artistId', authenticateToken, artistController.getArtistById);
-router.get('/artists/:artistId/songs', authenticateToken, artistController.getArtistSongs);
-
-// Add these routes before the export default router
-
-// About Us routes (admin)
-router.post('/about-us', authenticateToken, aboutUsController.updateAboutUs);
-
-// Feedback routes (admin)
-router.get('/feedback', authenticateToken, feedbackController.getAllFeedback);
+export default router;

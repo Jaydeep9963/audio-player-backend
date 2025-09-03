@@ -1,3 +1,1 @@
-import aboutUsController from './aboutUs.controller';
-
-export { aboutUsController };
+export * as aboutUsController from './aboutUs.controller';

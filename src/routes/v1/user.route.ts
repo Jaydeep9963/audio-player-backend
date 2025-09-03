@@ -6,25 +6,38 @@ import { artistController } from '../../modules/artist';
 // Add this import at the top with other imports
 import { aboutUsController } from '../../modules/aboutUs';
 import { feedbackController } from '../../modules/feedback';
+import { privacyPolicyController } from '../../modules/privacyPolicy';
+import { termAndConditionController } from '../../modules/term&condition';
+import { notificationTokenController, notificationTokenValidation } from '../../modules/notificationToken';
+import { validate } from '../../modules/validate';
+import upload from '../../multerConfig';
 
 const router: Router = express.Router();
 
-// router
-//   .route('/')
-//   .post(auth('manageUsers'), validate(userValidation.createUser), userController.createUser)
-//   .get(auth('getUsers'), validate(userValidation.getUsers), userController.getUsers);
-
-// router.route('/:userId').get(auth('getUsers'), validate(userValidation.getUser), userController.getUser);
+// Main routes
 router.get('/categories', categoryController.getCategories);
 router.get('/subcategories', subCategoryController.getSubCategories);
 router.get('/audios', audioController.getAudios);
 router.get('/artists', artistController.getArtists);
 router.get('/search', audioController.getAudios);
-
-// router.get('/artists/:artistId/i', artistController.getArtistById);
 router.get('/artists/:artistId', artistController.getArtistSongs);
 
-export default router;
+// About Us route (user)
+router.get('/about-us', aboutUsController.getAboutUs);
+
+// Privacy Policy route (user)
+router.get('/privacy-policy', privacyPolicyController.getPrivacyPolicy);
+
+// Terms and Conditions route (user)
+router.get('/terms-and-conditions', termAndConditionController.getTac);
+
+// Feedback routes (user)
+router.post('/rate', feedbackController.submitRating);
+router.post('/feedback', feedbackController.submitFeedback);
+router.post('/rate-and-feedback', feedbackController.submitRatingAndFeedback);
+
+// Notification Token routes (user)
+router.post('/notification-token', upload.none(), validate(notificationTokenValidation.storeNotificationToken), notificationTokenController.storeNotificationToken);
 
 /**
  * @swagger
@@ -263,10 +276,4 @@ export default router;
  *         $ref: '#/components/responses/NotFound'
  */
 
-// About Us route (user)
-router.get('/about-us', aboutUsController.getAboutUs);
-
-// Separate feedback routes (user)
-router.post('/rate', feedbackController.submitRating);
-router.post('/feedback', feedbackController.submitFeedback);
-router.post('/rate-and-feedback', feedbackController.submitRatingAndFeedback);
+export default router;

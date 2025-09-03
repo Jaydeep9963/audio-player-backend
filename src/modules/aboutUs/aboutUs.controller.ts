@@ -1,63 +1,47 @@
 /* eslint-disable prettier/prettier */
 import { Request, Response } from 'express';
-import httpStatus from 'http-status';
-
 import { catchAsync } from '../utils';
-import { ApiError } from '../errors';
 import AboutUs from './aboutUs.model';
 
-// Get about us content (for users)
 export const getAboutUs = catchAsync(async (_req: Request, res: Response) => {
   try {
-    const aboutUs = await AboutUs.findOne().sort({ lastUpdated: -1 });
-
-    if (!aboutUs) {
-      return res.status(404).json({ message: 'About us content not found' });
-    }
-
+    const aboutUs = await AboutUs.findOne(); // Fetch the first about us content
     return res.status(200).json(aboutUs);
   } catch (error) {
-    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Internal Server Error');
+    return res.status(500).json({ message: 'Error fetching about us' });
   }
 });
 
-// Create or update about us content (for admin)
-export const updateAboutUs = catchAsync(async (req: Request, res: Response) => {
+export const postAboutUs = catchAsync(async (req: Request, res: Response) => {
+  const { content } = req.body;
   try {
-    const { content } = req.body;
-    
-    if (!content) {
-      throw new ApiError(httpStatus.BAD_REQUEST, 'Content is required');
-    }
-    
-    // Find the most recent about us content
-    const existingAboutUs = await AboutUs.findOne().sort({ lastUpdated: -1 });
-    
-    let aboutUs;
-    
-    if (existingAboutUs) {
-      // Update existing content
-      existingAboutUs.content = content;
-      existingAboutUs.lastUpdated = new Date();
-      aboutUs = await existingAboutUs.save();
+    let aboutUs = await AboutUs.findOne();
+
+    if (aboutUs) {
+      // Update existing about us
+      aboutUs.content = content;
+      aboutUs.lastUpdated = new Date();
+      await aboutUs.save();
     } else {
-      // Create new content
-      aboutUs = await AboutUs.create({
-        content,
-        lastUpdated: new Date()
-      });
+      // Create new about us
+      aboutUs = new AboutUs({ content });
+      await aboutUs.save();
     }
-    
+
     res.status(200).json(aboutUs);
   } catch (error) {
-    if (error instanceof ApiError) {
-      throw error;
-    }
-    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Internal Server Error');
+    res.status(500).json({ message: 'Error saving about us' });
   }
 });
 
-export default {
-  getAboutUs,
-  updateAboutUs
-};
+export const deleteAboutUs = catchAsync(async (_req: Request, res: Response) => {
+  try {
+    await AboutUs.deleteMany(); // Delete all about us content
+    res.status(200).json({ message: 'About us deleted' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error deleting about us' });
+  }
+});
+
+// Alias for backward compatibility
+export const updateAboutUs = postAboutUs;
