@@ -43,5 +43,3 @@ export const getUser = catchAsync(async (req: Request, res: Response) => {
 //     res.status(httpStatus.NO_CONTENT).send();
 //   }
 // });
-
-

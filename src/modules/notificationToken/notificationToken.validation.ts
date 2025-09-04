@@ -1,6 +1,5 @@
 /* eslint-disable prettier/prettier */
 import Joi from 'joi';
-import { objectId } from '../validate';
 
 export const storeNotificationToken = {
   body: Joi.object().keys({
@@ -8,15 +7,12 @@ export const storeNotificationToken = {
   }),
 };
 
-// This validation is kept for backward compatibility but the controller function has been modified
-export const getNotificationTokensByUser = {
-  params: Joi.object().keys({
-    userId: Joi.string().custom(objectId).required(),
-  }),
-};
-
-export const deleteNotificationToken = {
-  params: Joi.object().keys({
-    tokenId: Joi.string().custom(objectId).required(),
-  }),
+export const sendNotification = {
+  body: Joi.object().keys({
+    data: Joi.object().keys({
+      title: Joi.string().required().max(100),
+      msg: Joi.string().required().max(500),
+      notification_at: Joi.string().optional(), 
+    }).unknown(true).required() 
+  })
 };

@@ -61,7 +61,6 @@
     "prettier"
   ],
   "devDependencies": {
-    "@types/multer": "^1.4.12",
     "@commitlint/cli": "^16.2.3",
     "@commitlint/config-conventional": "^16.2.1",
     "@faker-js/faker": "^6.2.0",
@@ -78,6 +77,7 @@
     "@types/jsonwebtoken": "^9.0.7",
     "@types/mongoose": "^5.11.97",
     "@types/morgan": "^1.9.3",
+    "@types/multer": "^1.4.12",
     "@types/node": "^16.11.12",
     "@types/nodemailer": "^6.4.4",
     "@types/passport-jwt": "^3.0.6",
@@ -118,6 +118,7 @@
     "express": "^4.17.3",
     "express-mongo-sanitize": "^2.1.0",
     "express-rate-limit": "^5.5.1",
+    "firebase-admin": "^13.5.0",
     "helmet": "^4.6.0",
     "http-status": "^1.5.0",
     "joi": "^17.5.0",

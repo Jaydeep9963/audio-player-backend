@@ -37,7 +37,12 @@ router.post('/feedback', feedbackController.submitFeedback);
 router.post('/rate-and-feedback', feedbackController.submitRatingAndFeedback);
 
 // Notification Token routes (user)
-router.post('/notification-token', upload.none(), validate(notificationTokenValidation.storeNotificationToken), notificationTokenController.storeNotificationToken);
+router.post(
+  '/notification-token',
+  upload.none(),
+  validate(notificationTokenValidation.storeNotificationToken),
+  notificationTokenController.storeNotificationToken
+);
 
 /**
  * @swagger

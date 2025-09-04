@@ -2,23 +2,22 @@
 import { Request, Response } from 'express';
 import { catchAsync } from '../utils';
 import NotificationToken from './notificationToken.model';
+import notificationService from "../notification-service";
 
 // Store notification token (for users) - No authentication required
 export const storeNotificationToken = catchAsync(async (req: Request, res: Response): Promise<void> => {
   const { token } = req.body;
   
   try {
-    // Check if token already exists
     const existingToken = await NotificationToken.findOne({ token });
     
     if (existingToken) {
-      // Token already exists, don't throw error but return success
       res.status(200).json({ 
         success: true, 
         message: 'Notification token already exists',
         data: existingToken 
       });
-      return;
+      
     } else {
       // Create new token
       const notificationToken = new NotificationToken({ token });
@@ -28,11 +27,11 @@ export const storeNotificationToken = catchAsync(async (req: Request, res: Respo
         message: 'Notification token created successfully',
         data: notificationToken 
       });
-      return;
+      
     }
   } catch (error) {
     res.status(500).json({ message: 'Error storing notification token' });
-    return;
+    
   }
 });
 
@@ -51,35 +50,59 @@ export const getAllNotificationTokens = catchAsync(async (_req: Request, res: Re
   }
 });
 
-// Get notification tokens by user (for admin)
-export const getNotificationTokensByUser = catchAsync(async (res: Response): Promise<void> => {
-  // Parameter kept for backward compatibility but not used
-  // const { userId } = req.params;
-  
+// Send notification to all users (for admin)
+export const sendNotificationToAll = catchAsync(async (req: Request, res: Response): Promise<void> => {
   try {
-    // This function is no longer applicable as tokens are not associated with users
-    // Returning empty results
-    const tokens: any[] = [];
-    // const tokens = await NotificationToken.find()
-    //   .sort({ createdAt: -1 });
+    const { data } = req.body;
+    
+    if (!data || !data.title || !data.msg) {
+      res.status(400).json({ 
+        success: false, 
+        message: 'Data object with title and msg are required' 
+      });
+      return;
+    }
+
+    const { title, msg } = data;
+    
+    const result = await notificationService.sendToAllUsersWithCleanup(title, msg, data);
+    const summary = notificationService.getSendResultSummary(result);
     
     res.status(200).json({
-      results: tokens,
-      total: tokens.length
+      success: true,
+      message: 'Notifications sent successfully',
+      data: summary
     });
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching user notification tokens' });
+    console.error('Error sending notifications to all users:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error sending notifications' 
+    });
   }
 });
 
-// Delete notification token (for admin)
-export const deleteNotificationToken = catchAsync(async (req: Request, res: Response): Promise<void> => {
-  const { tokenId } = req.params;
-  
+// Get active tokens count (for admin)
+export const getActiveTokensCount = catchAsync(async (_req: Request, res: Response): Promise<void> => {
   try {
-    await NotificationToken.findByIdAndDelete(tokenId);
-    res.status(200).json({ message: 'Notification token deleted successfully' });
+    const count = await notificationService.getActiveTokensCount();
+    res.status(200).json({ 
+      success: true, 
+      data: { activeTokens: count } 
+    });
   } catch (error) {
-    res.status(500).json({ message: 'Error deleting notification token' });
+    console.error('Error getting active tokens count:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error getting active tokens count' 
+    });
   }
 });
+
+// Export all controller functions
+export const notificationTokenController = {
+  storeNotificationToken,
+  getAllNotificationTokens,
+  sendNotificationToAll,
+  getActiveTokensCount
+};

@@ -2,6 +2,16 @@ import express, { Router } from 'express';
 import authRoute from './admin.route';
 // import docsRoute from './swagger.route';
 import userRoute from './user.route';
+
+/* istanbul ignore next */
+// if (config.env === 'development') {
+//   devIRoute.forEach((route) => {
+//     router.use(route.path, route.route);
+//   });
+// }
+
+// Add this import
+import { artistRoute } from '../../modules/artist';
 // import config from '../../config/config';
 
 const router = express.Router();
@@ -33,16 +43,6 @@ const defaultIRoute: IRoute[] = [
 defaultIRoute.forEach((route) => {
   router.use(route.path, route.route);
 });
-
-/* istanbul ignore next */
-// if (config.env === 'development') {
-//   devIRoute.forEach((route) => {
-//     router.use(route.path, route.route);
-//   });
-// }
-
-// Add this import
-import { artistRoute } from '../../modules/artist';
 
 // Add this route
 router.use('/artists', artistRoute);

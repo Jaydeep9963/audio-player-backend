@@ -8,12 +8,10 @@ import { audioController } from '../../modules/audio';
 import authenticateToken from './authenticationMiddleware';
 import { privacyPolicyController } from '../../modules/privacyPolicy';
 import { termAndConditionController } from '../../modules/term&condition';
-// import { auth } from '../../modules/auth';
 import { artistController } from '../../modules/artist';
-// Add these imports at the top with other imports
 import { aboutUsController } from '../../modules/aboutUs';
 import { feedbackController } from '../../modules/feedback';
-import { notificationTokenController } from '../../modules/notificationToken';
+import { notificationTokenController, notificationTokenValidation } from '../../modules/notificationToken';
 
 const router: Router = express.Router();
 
@@ -119,6 +117,13 @@ router.get('/feedback', authenticateToken, feedbackController.getAllFeedback);
 
 // Notification Token routes (admin)
 router.get('/notification-tokens', authenticateToken, notificationTokenController.getAllNotificationTokens);
+router.post(
+  '/send-notification',
+  authenticateToken,
+  upload.none(),
+  validate(notificationTokenValidation.sendNotification),
+  notificationTokenController.sendNotificationToAll
+);
 
 /**
  * @swagger
