@@ -14,6 +14,7 @@ interface IAudio extends Document {
   audio: FileData; // Object with file properties
   lyrics: FileData; // Object with file properties
   image: FileData; // Object with file properties
+  duration: number; // Duration in seconds
   subcategory: Schema.Types.ObjectId;
   artist: Schema.Types.ObjectId; // Added artist field
 }
@@ -73,8 +74,19 @@ const AudioSchema: Schema = new Schema({
       type: Number,
     },
   },
+  duration: {
+    type: Number,
+    required: true,
+    min: 0,
+    default: 0
+  }, 
+  durationFormatted: {
+    type: String,
+    required: true,
+    default: "00:00"
+  }, 
   subcategory: { type: Schema.Types.ObjectId, ref: 'Subcategory', required: true },
-  artist: { type: Schema.Types.ObjectId, ref: 'Artist', required: true }, // Added artist reference
+  artist: { type: Schema.Types.ObjectId, ref: 'Artist', required: true }, 
 });
 
 export default mongoose.model<IAudio>('Audio', AudioSchema);
