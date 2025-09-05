@@ -81,6 +81,39 @@ export const getArtistById = catchAsync(async (req: Request, res: Response) => {
   }
 });
 
+export const updateArtist = catchAsync(async (req: Request, res: Response) => {
+  try {
+    const { artistId } = req.params;
+    const { name, bio } = req.body;
+    
+    const artist = await Artist.findById(artistId);
+    
+    if (!artist) {
+      return res.status(404).json({ message: 'Artist not found' });
+    }
+    
+    // Update fields if provided
+    if (name) artist.name = name;
+    if (bio !== undefined) artist.bio = bio;
+    
+    // Handle image update if a new file is provided
+    if (req.file) {
+      artist.image = {
+        file: `uploads/artist/image/${req.file.filename}`,
+        fileName: req.file.filename,
+        fileType: req.file.mimetype,
+        fileSize: req.file.size,
+      };
+    }
+    
+    await artist.save();
+    
+    return res.status(200).json({ success: true, data: artist, message: 'Artist updated successfully' });
+  } catch (error) {
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Internal Server Error');
+  }
+});
+
 export const getArtistSongs = catchAsync(async (req: Request, res: Response) => {
   try {
     const { artistId } = req.params;

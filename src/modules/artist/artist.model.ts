@@ -1,10 +1,18 @@
 /* eslint-disable prettier/prettier */
 import mongoose, { Document, Schema } from 'mongoose';
 
+// Define a custom image type
+interface IImage {
+  file: string;
+  fileName: string;
+  fileType: string;
+  fileSize: number;
+}
+
 export interface IArtist extends Document {
   name: string;
   bio: string;
-  image: File;
+  image: IImage;
   audios: Array<Schema.Types.ObjectId>;
 }
 

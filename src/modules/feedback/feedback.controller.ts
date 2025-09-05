@@ -99,13 +99,54 @@ export const getAllFeedback = catchAsync(async (req: Request, res: Response) => 
     const limit = parseInt(req.query['limit'] as string, 10) || 10;
     const skip = (page - 1) * limit;
     const type = req.query['type'] as string || null;
+    const search = req.query['search'] as string || '';
     
-    const filter = type ? { type } : {};
+    // Build filter object based on type and search parameters
+    let filter: any = {};
     
-    const feedbackList = await Feedback.find(filter)
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
+    if (type) {
+      filter.type = type;
+    }
+    
+    if (search) {
+      filter.name = { $regex: search, $options: 'i' };
+    }
+    
+    // Create aggregation pipeline for sorting by search relevance
+    let feedbackList;
+    
+    if (search) {
+      // If search parameter exists, use aggregation to sort by name relevance
+      feedbackList = await Feedback.aggregate([
+        { $match: filter },
+        { $addFields: {
+          // Add a score field based on how closely the name matches the search term
+          // Exact matches get highest priority
+          nameMatchScore: {
+            $cond: [
+              { $eq: [{ $toLower: "$name" }, search.toLowerCase()] },
+              3,  // Exact match (case insensitive)
+              {
+                $cond: [
+                  { $regexMatch: { input: { $toLower: "$name" }, regex: `^${search.toLowerCase()}` } },
+                  2,  // Starts with search term
+                  1   // Contains search term somewhere
+                ]
+              }
+            ]
+          }
+        }},
+        { $sort: { nameMatchScore: -1, createdAt: -1 } },
+        { $skip: skip },
+        { $limit: limit }
+      ]);
+    } else {
+      // If no search parameter, use regular find with sort by creation date
+      feedbackList = await Feedback.find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit);
+    }
     
     const totalFeedback = await Feedback.countDocuments(filter);
     const totalPages = Math.ceil(totalFeedback / limit);

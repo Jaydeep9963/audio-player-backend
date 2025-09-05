@@ -94,6 +94,7 @@ router.delete('/audios/:audioId', authenticateToken, audioController.deleteAudio
 // Artist routes
 router.get('/artists', authenticateToken, artistController.getArtists);
 router.post('/artists', authenticateToken, upload.single('image'), artistController.addArtist);
+router.put('/artists/:artistId', authenticateToken, upload.single('image'), artistController.updateArtist);
 router.get('/artists/:artistId', authenticateToken, artistController.getArtistById);
 router.get('/artists/:artistId/songs', authenticateToken, artistController.getArtistSongs);
 
