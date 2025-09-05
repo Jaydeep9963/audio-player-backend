@@ -2,8 +2,7 @@
 import { Request, Response } from 'express';
 import httpStatus from 'http-status';
 import mongoose from 'mongoose';
-import fs from 'fs';
-
+// import fs from 'fs';
 import { catchAsync } from '../utils';
 import { ApiError } from '../errors';
 import Category from './category.model';
@@ -11,15 +10,15 @@ import SubCategory from '../subCategory/subCategory.model';
 import Audio from '../audio/audio.model';
 
 // Utility function to check if image file exists
-const checkImageExists = (imagePath: string): boolean => {
-  try {
-    // Remove the leading /uploads/ to get the relative path for fs.existsSync
-    const relativePath = imagePath.startsWith('/uploads/') ? imagePath.substring(8) : imagePath;
-    return fs.existsSync(relativePath);
-  } catch (error) {
-    return false;
-  }
-};
+// const checkImageExists = (imagePath: string): boolean => {
+//   try {
+//     // Remove the leading /uploads/ to get the relative path for fs.existsSync
+//     const relativePath = imagePath.startsWith('/uploads/') ? imagePath.substring(8) : imagePath;
+//     return fs.existsSync(relativePath);
+//   } catch (error) {
+//     return false;
+//   }
+// };
 
 export const getTotalNumbers = catchAsync(async (_req: Request, res: Response) => {
   try {
@@ -53,18 +52,18 @@ export const getCategories = catchAsync(async (req: Request, res: Response) => {
       const categoryObj = category.toObject();
 
       // Check if image file exists
-      if (categoryObj.image && categoryObj.image.file) {
-        const imageExists = checkImageExists(categoryObj.image.file);
-        if (!imageExists) {
-          // Set a default image or null for missing images
-          categoryObj.image = {
-            file: null,
-            fileName: 'default-image.jpg',
-            fileType: 'image/jpeg',
-            fileSize: 0,
-          };
-        }
-      }
+      // if (categoryObj.image && categoryObj.image.file) {
+        // const imageExists = checkImageExists(categoryObj.image.file);
+        // if (!imageExists) {
+        //   // Set a default image or null for missing images
+        //   categoryObj.image = {
+        //     file: null,
+        //     fileName: 'default-image.jpg',
+        //     fileType: 'image/jpeg',
+        //     fileSize: 0,
+        //   };
+        // }
+      // }
 
       return categoryObj;
     });
@@ -101,7 +100,7 @@ export const addCategory = catchAsync(async (req: Request, res: Response) => {
     const newCategory = {
       category_name: categoryName,
       image: {
-        file: `/uploads/category/image/${req.file?.filename}`, // Use the correct path for static serving
+        file: `/uploads/category/image/${req.file?.filename}`,
         fileName: req.file?.filename,
         fileType: req.file?.mimetype,
         fileSize: req.file?.size,
