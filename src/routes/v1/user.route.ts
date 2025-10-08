@@ -20,7 +20,7 @@ router.get('/subcategories', subCategoryController.getSubCategories);
 router.get('/audios', audioController.getAudios);
 router.get('/artists', artistController.getArtists);
 router.get('/search', audioController.getAudios);
-router.get('/artists/:artistId', artistController.getArtistSongs);
+router.get('/artists/:artistId', artistController.getArtistById);
 
 // About Us route (user)
 router.get('/about-us', aboutUsController.getAboutUs);

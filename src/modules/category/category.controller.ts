@@ -8,6 +8,8 @@ import { ApiError } from '../errors';
 import Category from './category.model';
 import SubCategory from '../subCategory/subCategory.model';
 import Audio from '../audio/audio.model';
+import Feedback from '../feedback/feedback.model';
+import { Artist } from '../artist';
 
 // Utility function to check if image file exists
 // const checkImageExists = (imagePath: string): boolean => {
@@ -25,11 +27,15 @@ export const getTotalNumbers = catchAsync(async (_req: Request, res: Response) =
     const totalNumOfCategory = await Category.count();
     const totalNumOfSubCategory = await SubCategory.count();
     const totalNumOfAudio = await Audio.count();
+    const totalNumOfArtist = await Artist.count();
+    const totalNumOfReview = await Feedback.count();
 
     res.status(200).json({
       totalNumOfCategory,
       totalNumOfSubCategory,
       totalNumOfAudio,
+      totalNumOfArtist,
+      totalNumOfReview
     });
   } catch (error) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Internal Server Error');

@@ -164,7 +164,37 @@ export const getArtistSongs = catchAsync(async (req: Request, res: Response) => 
       totalSongs,
       totalPages,
       currentPage: page,
-      pageSize: limit
+      pageSize: limit,
+    });
+  } catch (error) {
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Internal Server Error');
+  }
+});
+
+export const deleteArtist = catchAsync(async (req: Request, res: Response) => {
+  try {
+    const { artistId } = req.params;
+    
+    const artist = await Artist.findById(artistId);
+    
+    if (!artist) {
+      return res.status(404).json({ message: 'Artist not found' });
+    }
+    
+    // Find all audio files associated with this artist
+    const associatedAudios = await Audio.find({ artist: artistId });
+    
+    // Delete all associated audio files first
+    if (associatedAudios.length > 0) {
+      await Audio.deleteMany({ artist: artistId });
+    }
+    
+    // Delete the artist
+    await Artist.findByIdAndDelete(artistId);
+    
+    return res.status(200).json({ 
+      success: true, 
+      message: 'Artist and all associated audio files deleted successfully' 
     });
   } catch (error) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Internal Server Error');

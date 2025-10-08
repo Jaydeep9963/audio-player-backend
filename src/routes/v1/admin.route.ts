@@ -89,6 +89,28 @@ router.put(
   ]),
   audioController.updateAudio
 );
+// Audio routes
+router.get('/audios', authenticateToken, audioController.getAudios);
+router.post(
+  '/audios',
+  authenticateToken,
+  upload.fields([
+    { name: 'audio', maxCount: 1 }, // audio file
+    { name: 'lyrics', maxCount: 1 }, // lyrics file
+    { name: 'image', maxCount: 1 }, // image file
+  ]),
+  audioController.addAudio
+);
+router.put(
+  '/audios/:audioId',
+  authenticateToken,
+  upload.fields([
+    { name: 'audio', maxCount: 1 }, // audio file
+    { name: 'lyrics', maxCount: 1 }, // lyrics file
+    { name: 'image', maxCount: 1 }, // image file
+  ]),
+  audioController.updateAudio
+);
 router.delete('/audios/:audioId', authenticateToken, audioController.deleteAudio);
 
 // Artist routes
@@ -97,6 +119,7 @@ router.post('/artists', authenticateToken, upload.single('image'), artistControl
 router.put('/artists/:artistId', authenticateToken, upload.single('image'), artistController.updateArtist);
 router.get('/artists/:artistId', authenticateToken, artistController.getArtistById);
 router.get('/artists/:artistId/songs', authenticateToken, artistController.getArtistSongs);
+router.delete('/artists/:artistId', authenticateToken, artistController.deleteArtist);
 
 // Privacy Policy routes
 router.get('/privacy-policy', authenticateToken, upload.none(), privacyPolicyController.getPrivacyPolicy);
